@@ -1,0 +1,98 @@
+#include<LiquidCrystal.h>
+const int rs = 12,en = 11,d4 = 6,d5 = 5, d6 = 4,d7 = 3;
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
+#include "DHT.h"
+#define DHTPIN 2
+#define DHTTYPE DHT11
+DHT dht(DHTPIN,DHTTYPE);
+ void setup(){
+  lcd.begin(16,2);
+  Serial.begin(9600);
+  Serial.println("DHTxx test!");
+  pinMode(8,OUTPUT);
+  pinMode(9,OUTPUT);
+  dht.begin();
+
+ }
+ void loop() {
+  // set the cursor to column 0, line 1
+  // (note: line 1 is the second row, since counting begins with 0):
+  delay(500);
+ 
+ float h = dht.readHumidity();
+ float t = dht.readTemperature();
+ float f = dht.readTemperature(true);
+ if(isnan(h) || isnan(t) || isnan(f)) {
+  Serial.println("Failed to read from DHT sensor!");
+  return;
+}
+
+ float hif = dht.computeHeatIndex(f,h);
+ float hic = dht.computeHeatIndex(t,h,false);
+
+Serial.print("Humidity:");
+Serial.print(h);
+Serial.print("%\t");
+Serial.print("Temperature:");
+Serial.print(t);
+Serial.print("*C");
+Serial.print(f);
+Serial.print("*F\t");
+Serial.print("Heat index:");
+Serial.print(hic);
+Serial.print("*C");
+Serial.print(hif);
+Serial.print("*F");
+
+if (h>79){
+  digitalWrite(8,HIGH);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Humidity");
+  lcd.setCursor(0,1);
+  lcd.print("HIGH 'ON' : ");
+  lcd.setCursor(10,1);
+  lcd.print(h);
+  delay(1000);
+}
+else
+{
+  digitalWrite(8,LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Humidity");
+  lcd.setCursor(0,1);
+  lcd.print("LOW 'OFF' : ");
+  lcd.setCursor(10,1);
+  lcd.print(h);
+  delay(1000);
+}
+if (t > 25)
+{
+  digitalWrite(9,HIGH);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Temperature");
+  lcd.setCursor(0,1);
+  lcd.print("HIGH 'ON' : ");
+  lcd.setCursor(10,1);
+  lcd.print(t);
+  delay(500);
+
+}
+else
+{
+  digitalWrite(9,LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Temperature");
+  lcd.setCursor(0,1);
+  lcd.print("LESS 'OFF' : ");
+  lcd.setCursor(10,1);
+  lcd.print(t);
+  delay(500);
+
+
+}
+
+}
